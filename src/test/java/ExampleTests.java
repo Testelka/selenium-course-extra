@@ -3,15 +3,14 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import java.time.Duration;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 
 public class ExampleTests {
     WebDriver driver;
-    String fileUrl;
 
     @BeforeEach
     public void setup() {
@@ -20,34 +19,35 @@ public class ExampleTests {
 
     @AfterEach
     public void quitDriver() {
-        if (fileUrl != null) {
-            driver.get(fileUrl);
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-            wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".delete-attachment"))).click();
-            driver.switchTo().alert().accept();
-        }
         driver.quit();
     }
 
     @Test
-    public void fileUpload() {
-        driver.get("http://localhost:8080/my-account/");
-        driver.findElement(By.cssSelector("#username")).sendKeys("admin");
-        driver.findElement(By.cssSelector("#password")).sendKeys("admin");
-        driver.findElement(By.cssSelector("[name=login]")).click();
+    public void test() {
+        driver.get("http://localhost:8080/" +
+                "product/calculus-made-easy-by-silvanus-p-thompson/");
+        driver.findElement(By.cssSelector("[name=add-to-cart]")).click();
 
-        driver.get("http://localhost:8080/wp-admin/upload.php");
-        driver.findElement(By.cssSelector("a.page-title-action")).click();
-        driver.findElement(By.cssSelector("input[type=file]"))
-                .sendKeys("/Users/ela/Code/resources/envelope.png");
+        int size = driver.manage().getCookies().size();
+        Cookie itemsInCartCookie = driver.manage().getCookieNamed("woocommerce_items_in_cart");
+        //driver.manage().deleteCookie(itemsInCartCookie);
+        driver.manage().deleteCookieNamed("woocommerce_items_in_cart");
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
-        wait.until(ExpectedConditions.elementToBeClickable(
-                        By.cssSelector("[aria-label=\"envelope\"]"))).click();
-
-        Assertions.assertEquals("File size: 2 MB", driver.findElement(
-                By.cssSelector(".file-size")).getText());
-
-        fileUrl = driver.getCurrentUrl();
+        //driver.manage().deleteAllCookies();
+        Assertions.assertEquals(2, driver.manage().getCookies().size());
+    }
+    @Test
+    public void test2() {
+        driver.get("https://fakestore.testelka.pl/product/windsurfing-w-lanzarote-costa-teguise/");
+        driver.findElement(By.cssSelector("[name=add-to-cart]")).click();
+        Cookie newCookie = new Cookie("test cookie name",
+                "test cookie value",
+                "fakestore.testelka.pl",
+                "/",
+                new GregorianCalendar(2023, Calendar.AUGUST, 4).getTime(),
+                true,
+                true);
+        driver.manage().addCookie(newCookie);
+        Assertions.assertEquals(5, driver.manage().getCookies().size());
     }
 }
