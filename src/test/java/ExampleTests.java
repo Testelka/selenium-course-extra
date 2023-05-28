@@ -1,19 +1,14 @@
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.Pdf;
-import org.openqa.selenium.PrintsPage;
-import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.print.PageMargin;
-import org.openqa.selenium.print.PageSize;
-import org.openqa.selenium.print.PrintOptions;
-
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Base64;
+import java.nio.file.StandardCopyOption;
 
 public class ExampleTests {
     WebDriver driver;
@@ -29,29 +24,29 @@ public class ExampleTests {
     }
 
     @Test
-    public void printPageExample() {
+    public void screenshotExample() {
         driver.get("http://localhost:3000/");
-        PrintsPage printer = (PrintsPage) driver;
-        PrintOptions printOptions = new PrintOptions();
-        PageSize pageSize = new PageSize(27.94, 21.59);
-        printOptions.setPageSize(pageSize);
-        PageMargin pageMargin = new PageMargin(0, 0, 0, 0);
-        printOptions.setPageMargin(pageMargin);
-        printOptions.setBackground(true);
-        printOptions.setScale(0.50);
-
-        Pdf pdf = printer.print(printOptions);
-        String content = pdf.getContent();
-
-        Path outputPath = Paths.get("./target/output.pdf");
-
-        byte[] decodedBytes = Base64.getDecoder().decode(content);
+        File screenshot = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+        Path destinationPath = Paths.get("./target/image.png");
         try {
-            Files.createDirectories(outputPath.getParent());
-            Files.write(outputPath, decodedBytes);
+            Files.copy(screenshot.toPath(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Screenshot saved.");
         } catch (IOException e) {
-            throw new RuntimeException("An error occurred while writing the PDF file: " + e);
+            throw new RuntimeException(e);
         }
     }
 
+    @Test
+    public void elementScreenshotExample() {
+        driver.get("http://localhost:3000/");
+        WebElement element = driver.findElement(By.cssSelector(".items-end.mx-auto"));
+        File screenshot = element.getScreenshotAs(OutputType.FILE);
+        Path destinationPath = Paths.get("./target/image.png");
+        try {
+            Files.copy(screenshot.toPath(), destinationPath, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("Screenshot saved.");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
