@@ -3,8 +3,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.WebDriverWait;
-import java.time.Duration;
+import org.openqa.selenium.devtools.DevTools;
+import org.openqa.selenium.devtools.HasDevTools;
+import org.openqa.selenium.devtools.v113.log.Log;
 
 public class ExampleTests {
     WebDriver driver;
@@ -19,20 +20,13 @@ public class ExampleTests {
 
     @Test
     public void test() {
-        driver.get("http://localhost:3000/");
-        JavascriptExecutor js = (JavascriptExecutor)driver;
-
-        WebElement twitterLink = driver.findElement(By.cssSelector("a[href='https://twitter.com/ralllyco']"));
-        js.executeScript("arguments[0].scrollIntoView();", twitterLink);
-    }
-
-    @Test
-    public void test2() {
-        driver.get("http://localhost:3000/");
-        JavascriptExecutor js = (JavascriptExecutor)driver;
-
-        WebElement button = driver.findElement(By.cssSelector("a.bg-primary-500"));
-        String text = (String) js.executeScript("return arguments[0].innerText", button);
+        DevTools devTools = ((HasDevTools)driver).getDevTools();
+        devTools.createSession();
+        devTools.send(Log.enable());
+        devTools.getDomains().events().addConsoleListener(
+                log -> System.out.println(
+                        log.getTimestamp() + " " + log.getType() + " " + log.getMessages()));
+        driver.get("https://fakestore.testelka.pl/console-log-events");
 
     }
 }
