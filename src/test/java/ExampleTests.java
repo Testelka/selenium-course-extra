@@ -5,7 +5,6 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.devtools.DevTools;
 import org.openqa.selenium.devtools.HasDevTools;
-import org.openqa.selenium.devtools.v113.log.Log;
 
 public class ExampleTests {
     WebDriver driver;
@@ -22,11 +21,9 @@ public class ExampleTests {
     public void test() {
         DevTools devTools = ((HasDevTools)driver).getDevTools();
         devTools.createSession();
-        devTools.send(Log.enable());
-        devTools.getDomains().events().addConsoleListener(
-                log -> System.out.println(
-                        log.getTimestamp() + " " + log.getType() + " " + log.getMessages()));
-        driver.get("https://fakestore.testelka.pl/console-log-events");
-
+        devTools.getDomains().events().addJavascriptExceptionListener(System.out::println);
+        driver.get("https://fakestore.testelka.pl/javascript-exceptions/");
+        WebElement button1 = driver.findElement(By.id("button-1"));
+        button1.click();
     }
 }
