@@ -1,15 +1,17 @@
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
-
-import java.net.MalformedURLException;
-import java.net.URL;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+import java.time.Duration;
 
 public class ExampleTests {
     WebDriver driver;
+    String fileUrl;
 
     @BeforeEach
     public void setup() {
@@ -18,21 +20,34 @@ public class ExampleTests {
 
     @AfterEach
     public void quitDriver() {
+        if (fileUrl != null) {
+            driver.get(fileUrl);
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".delete-attachment"))).click();
+            driver.switchTo().alert().accept();
+        }
         driver.quit();
     }
 
     @Test
-    public void test() throws MalformedURLException {
-        driver.get("http://localhost:8080/");
-        driver.findElement(By.cssSelector("#menu-item-88")).click();
+    public void fileUpload() {
+        driver.get("http://localhost:8080/my-account/");
+        driver.findElement(By.cssSelector("#username")).sendKeys("admin");
+        driver.findElement(By.cssSelector("#password")).sendKeys("admin");
+        driver.findElement(By.cssSelector("[name=login]")).click();
 
-//        driver.navigate().back();
-//        driver.navigate().forward();
-//        driver.navigate().refresh();
-//        driver.navigate().to("http://localhost:8080/");
-//        driver.navigate().to(new URL("http://localhost:8080/"));
+        driver.get("http://localhost:8080/wp-admin/upload.php");
+        driver.findElement(By.cssSelector("a.page-title-action")).click();
+        driver.findElement(By.cssSelector("input[type=file]"))
+                .sendKeys("/Users/ela/Code/resources/envelope.png");
 
-        String pageSource = driver.getPageSource();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        wait.until(ExpectedConditions.elementToBeClickable(
+                        By.cssSelector("[aria-label=\"envelope\"]"))).click();
 
+        Assertions.assertEquals("File size: 2 MB", driver.findElement(
+                By.cssSelector(".file-size")).getText());
+
+        fileUrl = driver.getCurrentUrl();
     }
 }
