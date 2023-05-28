@@ -5,7 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Cookie;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.Select;
+
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -23,31 +26,40 @@ public class ExampleTests {
     }
 
     @Test
-    public void test() {
-        driver.get("http://localhost:8080/" +
-                "product/calculus-made-easy-by-silvanus-p-thompson/");
-        driver.findElement(By.cssSelector("[name=add-to-cart]")).click();
+    public void single_choice_select_example() {
+        driver.get("https://fakestore.testelka.pl/lista-rozwijana/");
+        WebElement selectElement = driver.findElement(By.cssSelector("select#flavors"));
 
-        int size = driver.manage().getCookies().size();
-        Cookie itemsInCartCookie = driver.manage().getCookieNamed("woocommerce_items_in_cart");
-        //driver.manage().deleteCookie(itemsInCartCookie);
-        driver.manage().deleteCookieNamed("woocommerce_items_in_cart");
+        Select select = new Select(selectElement);
+        //select.selectByIndex(3);
+        //select.selectByVisibleText("marakuja");
+        //select.selectByValue("passion-fruit");
 
-        //driver.manage().deleteAllCookies();
-        Assertions.assertEquals(2, driver.manage().getCookies().size());
+        Assertions.assertEquals(4, select.getOptions().size());
     }
+
     @Test
-    public void test2() {
-        driver.get("https://fakestore.testelka.pl/product/windsurfing-w-lanzarote-costa-teguise/");
-        driver.findElement(By.cssSelector("[name=add-to-cart]")).click();
-        Cookie newCookie = new Cookie("test cookie name",
-                "test cookie value",
-                "fakestore.testelka.pl",
-                "/",
-                new GregorianCalendar(2023, Calendar.AUGUST, 4).getTime(),
-                true,
-                true);
-        driver.manage().addCookie(newCookie);
-        Assertions.assertEquals(5, driver.manage().getCookies().size());
+    public void multiple_choice_select_example() {
+        driver.get("https://fakestore.testelka.pl/lista-rozwijana/");
+        WebElement selectElement = driver.findElement(By.cssSelector("select#flavors-multiple"));
+        Select select = new Select(selectElement);
+
+        Assertions.assertTrue(select.isMultiple());
     }
+
+    @Test
+    public void multiple_choice_select_with_selected_options_example() {
+        driver.get("https://fakestore.testelka.pl/lista-rozwijana/");
+        WebElement selectElement = driver.findElement(By.cssSelector("select#flavors-multiple-selected"));
+        Select select = new Select(selectElement);
+
+        //select.deselectAll();
+        //select.deselectByIndex(1);
+        //select.deselectByValue("chocolate");
+        //select.deselectByVisibleText("czekoladowy");
+
+        Assertions.assertEquals(2, select.getAllSelectedOptions().size());
+
+    }
+
 }
