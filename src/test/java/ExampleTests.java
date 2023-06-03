@@ -3,22 +3,19 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.devtools.v85.webaudio.model.AudioListenerWillBeDestroyed;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.locators.RelativeLocator;
-
-import java.util.List;
 
 public class ExampleTests {
     WebDriver driver;
+    Actions actions;
 
     @BeforeEach
     public void setup() {
         driver = new ChromeDriver();
+        actions = new Actions(driver);
     }
 
     @AfterEach
@@ -26,21 +23,22 @@ public class ExampleTests {
         driver.quit();
     }
     @Test
-    public void test() {
-        driver.navigate().to("https://fakestore.testelka.pl/select/");
-        List<WebElement> items = driver.findElements(By.cssSelector(".ui-selectee"));
-        Actions actions = new Actions(driver);
-        actions
-                .keyDown(Keys.CONTROL)
-                .click(items.get(1))
-                .click(items.get(3))
-                .click(items.get(4))
-                .keyUp(Keys.CONTROL)
-                .perform();
+    public void drag_box_to_another_box_should_show_that_dropped() {
+        driver.navigate().to("https://fakestore.testelka.pl/actions");
+        WebElement draggable = driver.findElement(By.cssSelector("#draggable"));
+        WebElement droppable = driver.findElement(By.cssSelector("#droppable"));
+        actions.dragAndDrop(draggable, droppable).perform();
+        Assertions.assertEquals("Dropped!", droppable.getText(),
+                "Message in the droppable box was not changed. Was the element dropped?");
+    }
 
-        List<WebElement> selectedItems = driver.findElements(By.cssSelector(".ui-selected"));
-        Assertions.assertEquals(3, selectedItems.size(),
-                "Number of selected items is not what expected.");
-
+    @Test
+    public void drag_box_to_another_box_corner_should_show_that_dropped() {
+        driver.navigate().to("https://fakestore.testelka.pl/actions");
+        WebElement draggable = driver.findElement(By.cssSelector("#draggable"));
+        WebElement droppable = driver.findElement(By.cssSelector("#droppable"));
+        actions.clickAndHold(draggable).moveToElement(droppable, 74, 74).release().perform();
+        Assertions.assertEquals("Dropped!", droppable.getText(),
+                "Message in the droppable box was not changed. Was the element dropped?");
     }
 }
